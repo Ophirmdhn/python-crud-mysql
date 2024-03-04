@@ -5,7 +5,6 @@ user = "root"
 password = ""
 database = "db_crud"
 
-# Koneksi database
 db = mysql.connect(
     host=host,
     user=user,
@@ -13,60 +12,84 @@ db = mysql.connect(
     database=database
 )
 
-cursor = db.cursor()  # Untuk mengeksekusi sql
 
-# cursor.execute("CREATE DATABASE db_crud")  # Membuat database baru
+def show_menu():
+    print("\n===== APLIKASI DATA MAHASISWA =====")
+    print("1. Tambahkan Data")
+    print("2. Tampilkan Data")
+    print("3. Edit Data")
+    print("4. Hapus Data")
+    print("0. Keluar")
+    print("===================================")
 
-# cursor.execute("DROP DATABASE db_crud")  # Menghapus database
+    menu = int(input("Pilih Menu : "))
 
-# cursor.execute("SHOW DATABASES")  # Menampilkan semua database yang ada
-
-# db.database = "db_crud"
-
-# Membuat table
-# cursor.execute("""
-#     CREATE TABLE tb_mahasiswa(
-#     id INT(3) NOT NULL AUTO_INCREMENT,
-#     nama VARCHAR(50) NOT NULL,
-#     nim VARCHAR(10) NOT NULL,
-#     PRIMARY KEY (id)
-#     );
-# """)
-
-# cursor.execute("DROP TABLE tb_mahasiswa")  # Menghapus table
-
-# db.commit()  # Menjalankan query/mengupdate data
-
-# cursor.execute("DESC tb_mahasiswa")  # Menampilkan deskripsi tabel
-# print(cursor.fetchall())
-
-cursor.execute("SHOW TABLES")  # Menampilkan table yang ada pada database
-print(cursor.fetchall())  # Menampilkan data di terminal
-
-# Menambahkan data ke dalam tabel
-# cursor.execute("""
-#     INSERT INTO tb_mahasiswa (nama,nim)
-#     VALUES ('Sumbul', 11223344)
-# """)
-# db.commit()
-
-# Mengupdate data pada tabel
-# cursor.execute("""
-#     UPDATE tb_mahasiswa
-#     SET nama = 'Ahmad', nim = '12341234'
-#     WHERE id = 4
-# """)
-# db.commit()
-
-# Menghapus data pada tabel
-# cursor.execute("""
-#     DELETE FROM tb_mahasiswa
-#     WHERE id = 2
-# """)
-# db.commit()
+    if menu == 1:
+        insert_data()
+    elif menu == 2:
+        show_data()
+    elif menu == 3:
+        update_data()
+    elif menu == 4:
+        delete_data()
+    elif menu == 0:
+        exit()
+    else:
+        print("\nMenu tidak tersedia!")
 
 
-cursor.execute("SELECT * FROM tb_mahasiswa")  # Menampilkan semua data yang ada pada tb_mahasiswa
-data = cursor.fetchall()
-for i in data:
-    print(i)
+def insert_data():
+    name = input("Masukan nama : ")
+    nim = input("Masukan NIM : ")
+
+    cursor = db.cursor()
+    query = "INSERT INTO tb_mahasiswa (nama, nim) VALUES (%s, %s)"
+    value = (name, nim)
+    cursor.execute(query, value)
+    db.commit()
+    print(f"\n{cursor.rowcount} Data berhasil disimpan")
+
+
+def show_data():
+    cursor = db.cursor()
+    query = "SELECT * FROM tb_mahasiswa"
+    cursor.execute(query)
+    result = cursor.fetchall()
+
+    if cursor.rowcount < 0:
+        print("\nTidak ada data!")
+    else:
+        print("\n======== DATA MAHASISWA ========")
+        for data in result:
+            print(data)
+
+
+def update_data():
+    cursor = db.cursor()
+    show_data()
+    student_id = int(input("\nPilih id mahasiswa yang ingin diubah : "))
+    name = input("Masukan nama baru : ")
+    nim = input("Masukan NIM baru : ")
+
+    query = "UPDATE tb_mahasiswa SET nama = %s, nim = %s WHERE id = %s"
+    value = (name, nim, student_id)
+    cursor.execute(query, value)
+    db.commit()
+    print(f"\nMahasiswa dengan id {student_id} berhasil diubah")
+
+
+def delete_data():
+    cursor = db.cursor()
+    show_data()
+    student_id = int(input("\nPilih id mahasiswa yang ingin dihapus : "))
+
+    query = "DELETE FROM tb_mahasiswa WHERE id = %s"
+    value = (student_id,)
+    cursor.execute(query, value)
+    db.commit()
+    print(f"\nMahasiswa dengan id {student_id} berhasil dihapus")
+
+
+if __name__ == "__main__":
+    while True:
+        show_menu()
